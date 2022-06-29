@@ -1,0 +1,39 @@
+name: Run python script
+
+on:
+  workflow_dispatch:
+
+env:
+  GOOGLE_SA_KEYFILE: ${{ secrets.GOOGLE_SA_KEYFILE }}
+  TABLE_ID: ${{ secrets.TABLE_ID }}
+  SHEET_TITLE: "Диски"
+  TITLE_ROWS_COUNT: "1"
+  URL_COL_NUM: "2"
+  PRICE_COL_LTR: "F"
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Setup python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.x"
+          cache: "pip"
+
+      - name: Create cred.json
+        uses: jsdaniell/create-json@1.1.2
+        with:
+          name: "cred.json"
+          json: ${{ env.GOOGLE_SA_KEYFILE }}
+          dir: "price_ru/"
+
+      - name: Run
+        run: |
+          python --version
+          pip install -r requirements.txt
+          python -m price_ru
