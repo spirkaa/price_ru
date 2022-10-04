@@ -7,7 +7,7 @@ repos:
       - id: end-of-file-fixer
       - id: mixed-line-ending
   - repo: https://github.com/asottile/pyupgrade
-    rev: v2.34.0
+    rev: v2.38.2
     hooks:
     - id: pyupgrade
       args: [--py39-plus]
@@ -16,11 +16,11 @@ repos:
     hooks:
       - id: isort
   - repo: https://github.com/ambv/black
-    rev: 22.6.0
+    rev: 22.8.0
     hooks:
       - id: black
   - repo: https://github.com/PyCQA/flake8
-    rev: 4.0.1
+    rev: 5.0.4
     hooks:
       - id: flake8
         additional_dependencies:
