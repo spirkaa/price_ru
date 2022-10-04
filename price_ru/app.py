@@ -4,11 +4,9 @@ import re
 from pathlib import Path
 
 import gspread
-import requests
-import urllib3
-from bs4 import BeautifulSoup
 from dotenv import load_dotenv
 from oauth2client.service_account import ServiceAccountCredentials
+from playwright.sync_api import sync_playwright
 
 load_dotenv()
 
@@ -23,8 +21,6 @@ SCOPE = ["https://spreadsheets.google.com/feeds"]
 logger = logging.getLogger("__name__")
 logging.getLogger("google.auth.transport.requests").setLevel(logging.WARNING)
 logging.getLogger("oauth2client").setLevel(logging.WARNING)
-logging.getLogger("urllib3").setLevel(logging.WARNING)
-urllib3.disable_warnings()
 
 
 def main() -> None:
@@ -38,31 +34,36 @@ def main() -> None:
         if item
     ]
 
-    for idx, cell in enumerate(url_cells, 1 + TITLE_ROWS_COUNT):
-        if "HYPERLINK" in cell:
-            price_cell = PRICE_COL_LTR + str(idx)
+    with sync_playwright() as p:
+        browser = p.firefox.launch()
+        page = browser.new_page()
+        for idx, cell in enumerate(url_cells, 1 + TITLE_ROWS_COUNT):
+            if "HYPERLINK" in cell:
+                price_cell = PRICE_COL_LTR + str(idx)
 
-            url = cell.split('"')[1]
-            name = cell.split('"')[3]
+                url = cell.split('"')[1]
+                name = cell.split('"')[3]
 
-            req = requests.get(url)
-            req.raise_for_status()
-            title = BeautifulSoup(req.content, "html.parser").title.text
-            new_price = int(re.search(r"от\s+(\d+)\s+руб", title).group(1))
+                page.goto(url)
+                page.wait_for_selector("h1")
 
-            if new_price:
-                old_price = int(wks.acell(price_cell).value)
-                price_change = new_price - old_price
+                title = page.title()
+                new_price = int(re.search(r"от\s+(\d+)\s+руб", title).group(1))
 
-                logger.info(
-                    f"{name:<16} --- Old price: {old_price}, New price: {new_price}, Change: {price_change}"  # noqa
-                )
+                if new_price:
+                    old_price = int(wks.acell(price_cell).value)
+                    price_change = new_price - old_price
 
-                if price_change != 0:
                     logger.info(
-                        f"{name:<16} --- Updating cell {price_cell} with {new_price}"
+                        f"{name:<16} --- Old price: {old_price}, New price: {new_price}, Change: {price_change}"  # noqa
                     )
-                    wks.update_acell(price_cell, new_price)
+
+                    if price_change != 0:
+                        logger.info(
+                            f"{name:<16} --- Updating cell {price_cell} with {new_price}"
+                        )
+                        wks.update_acell(price_cell, new_price)
+        browser.close()
 
 
 if __name__ == "__main__":

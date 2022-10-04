@@ -4,7 +4,7 @@ export DOCKER_BUILDKIT=1
 
 default: run
 
-TAG=price_ru
+TAG=spirkaa/price_ru
 PWD=$(shell pwd)
 
 build:

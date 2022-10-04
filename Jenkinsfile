@@ -11,11 +11,11 @@ pipeline {
   environment {
     GOOGLE_SA_KEYFILE_CREDS_ID = 'priceru-google-sa-keyfile'
     TABLE_ID = credentials('priceru-table-id')
-    SHEET_TITLE = "Диски"
-    TITLE_ROWS_COUNT = "1"
-    URL_COL_NUM = "2"
-    PRICE_COL_LTR = "F"
-    PYTHON_IMAGE = 'python:3.10-slim-bullseye'
+    SHEET_TITLE = 'Диски'
+    TITLE_ROWS_COUNT = '1'
+    URL_COL_NUM = '2'
+    PRICE_COL_LTR = 'F'
+    PYTHON_IMAGE = 'ghcr.io/spirkaa/python:3.10-bullseye-playwright-firefox'
   }
 
   stages {
