@@ -1,7 +1,7 @@
 image: ghcr.io/spirkaa/python:3.10-bullseye-playwright-firefox
 
 variables:
-  PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
+  # PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
   SHEET_TITLE: "Диски"
   TITLE_ROWS_COUNT: "1"
   URL_COL_NUM: "2"
@@ -9,14 +9,15 @@ variables:
 
 cache:
   paths:
-    - .cache/pip
+    # - .cache/pip
     - venv/
 
 before_script:
   - python --version
   - python -m venv venv
   - source venv/bin/activate
-  - pip install -r requirements.txt
+  - pip install --no-cache-dir --upgrade -r requirements.txt
+  - playwright install firefox
 
 run:
   script:
