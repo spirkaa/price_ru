@@ -10,6 +10,7 @@ from playwright.sync_api import sync_playwright
 
 load_dotenv()
 
+LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO").upper()
 TABLE_ID = os.getenv("TABLE_ID")
 SHEET_TITLE = os.getenv("SHEET_TITLE")
 TITLE_ROWS_COUNT = int(os.getenv("TITLE_ROWS_COUNT"))
@@ -18,7 +19,11 @@ PRICE_COL_LTR = os.getenv("PRICE_COL_LTR")
 
 SCOPE = ["https://spreadsheets.google.com/feeds"]
 
-logger = logging.getLogger("__name__")
+logger = logging.getLogger(__name__)
+logging.basicConfig(
+    format="%(asctime)s [%(levelname)s] [%(name)s:%(lineno)s:%(funcName)s] %(message)s",  # noqa
+    level=LOG_LEVEL,
+)
 logging.getLogger("google.auth.transport.requests").setLevel(logging.WARNING)
 logging.getLogger("oauth2client").setLevel(logging.WARNING)
 
@@ -67,10 +72,4 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    __version__ = "0.0.1"
-    logging.basicConfig(
-        format="%(asctime)s [%(levelname)8s] [%(name)s:%(lineno)s:%(funcName)20s()] --- %(message)s",  # noqa
-        level=logging.INFO,
-    )
-
     main()
