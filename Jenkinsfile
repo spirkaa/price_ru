@@ -15,7 +15,7 @@ pipeline {
     TITLE_ROWS_COUNT = '1'
     URL_COL_NUM = '2'
     PRICE_COL_LTR = 'F'
-    PYTHON_IMAGE = 'ghcr.io/spirkaa/python:3.10-bullseye-playwright-firefox'
+    BUILD_IMAGE = 'ghcr.io/spirkaa/python:3.11-bullseye-playwright-firefox'
   }
 
   stages {
@@ -44,7 +44,7 @@ pipeline {
       }
       agent {
         docker {
-          image env.PYTHON_IMAGE
+          image env.BUILD_IMAGE
           alwaysPull true
           reuseNode true
         }

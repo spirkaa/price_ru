@@ -2,10 +2,11 @@
 
 export DOCKER_BUILDKIT=1
 
-default: run
+TAG=ghcr.io/spirkaa/price_ru
 
-TAG=spirkaa/price_ru
 PWD=$(shell pwd)
+
+default: run
 
 build:
 	@docker build \

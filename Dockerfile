@@ -1,6 +1,6 @@
-ARG PYTHON_IMAGE=ghcr.io/spirkaa/python:3.10-bullseye-playwright-firefox
+ARG BUILD_IMAGE=ghcr.io/spirkaa/python:3.11-bullseye-playwright-firefox
 
-FROM ${PYTHON_IMAGE}
+FROM ${BUILD_IMAGE}
 
 COPY requirements.txt /
 

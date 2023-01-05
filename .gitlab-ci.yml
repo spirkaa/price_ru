@@ -1,4 +1,4 @@
-image: ghcr.io/spirkaa/python:3.10-bullseye-playwright-firefox
+image: ghcr.io/spirkaa/python:3.11-bullseye-playwright-firefox
 
 variables:
   # PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
