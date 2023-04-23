@@ -43,31 +43,33 @@ def main() -> None:
         browser = p.firefox.launch()
         page = browser.new_page()
         for idx, cell in enumerate(url_cells, 1 + TITLE_ROWS_COUNT):
-            if "HYPERLINK" in cell:
-                price_cell = PRICE_COL_LTR + str(idx)
+            if "HYPERLINK" not in cell:
+                continue
+            price_cell = PRICE_COL_LTR + str(idx)
 
-                url = cell.split('"')[1]
-                name = cell.split('"')[3]
+            url = cell.split('"')[1]
+            name = cell.split('"')[3]
 
-                page.goto(url)
-                page.wait_for_selector("h1")
+            page.goto(url)
+            page.wait_for_selector("h1")
 
-                title = page.title()
-                new_price = int(re.search(r"от\s+(\d+)\s+руб", title).group(1))
+            title = page.title()
+            new_price = int(re.search(r"от\s+(\d+)\s+руб", title).group(1))
+            if not new_price:
+                continue
 
-                if new_price:
-                    old_price = int(wks.acell(price_cell).value)
-                    price_change = new_price - old_price
+            old_price = int(wks.acell(price_cell).value)
+            price_change = new_price - old_price
+            logger.info(
+                f"{name:<16} --- Old price: {old_price}, "
+                f"New price: {new_price}, Change: {price_change}"
+            )
 
-                    logger.info(
-                        f"{name:<16} --- Old price: {old_price}, New price: {new_price}, Change: {price_change}"  # noqa
-                    )
-
-                    if price_change != 0:
-                        logger.info(
-                            f"{name:<16} --- Updating cell {price_cell} with {new_price}"
-                        )
-                        wks.update_acell(price_cell, new_price)
+            if price_change != 0:
+                logger.info(
+                    f"{name:<16} --- Updating cell {price_cell} with {new_price}"
+                )
+                wks.update_acell(price_cell, new_price)
         browser.close()
 
 
