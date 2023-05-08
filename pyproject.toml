@@ -1,2 +1,5 @@
 [tool.isort]
 profile = "black"
+
+[tool.pytest.ini_options]
+addopts = "--cov=. --cov-report term-missing:skip-covered"

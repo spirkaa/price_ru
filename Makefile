@@ -12,6 +12,9 @@ build:
 	@docker build \
 		--tag ${TAG} .
 
+test:
+	@pytest -v
+
 cleanup:
 	@docker rmi -f ${TAG}
 

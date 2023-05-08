@@ -14,8 +14,12 @@ load_dotenv()
 LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO").upper()
 TABLE_ID = os.getenv("TABLE_ID")
 SHEET_TITLE = os.getenv("SHEET_TITLE")
-TITLE_ROWS_COUNT = int(os.getenv("TITLE_ROWS_COUNT"))
-URL_COL_NUM = int(os.getenv("URL_COL_NUM"))
+TITLE_ROWS_COUNT = os.getenv("TITLE_ROWS_COUNT")
+if TITLE_ROWS_COUNT:
+    TITLE_ROWS_COUNT = int(TITLE_ROWS_COUNT)  # pragma: no cover
+URL_COL_NUM = os.getenv("URL_COL_NUM")
+if URL_COL_NUM:
+    URL_COL_NUM = int(URL_COL_NUM)  # pragma: no cover
 PRICE_COL_LTR = os.getenv("PRICE_COL_LTR")
 
 SCOPE = ["https://spreadsheets.google.com/feeds"]
