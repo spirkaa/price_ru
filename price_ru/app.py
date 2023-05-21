@@ -11,18 +11,18 @@ from playwright.sync_api import sync_playwright
 
 load_dotenv()
 
-LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO").upper()
-TABLE_ID = os.getenv("TABLE_ID")
-SHEET_TITLE = os.getenv("SHEET_TITLE")
-TITLE_ROWS_COUNT = os.getenv("TITLE_ROWS_COUNT")
-if TITLE_ROWS_COUNT:
-    TITLE_ROWS_COUNT = int(TITLE_ROWS_COUNT)  # pragma: no cover
-URL_COL_NUM = os.getenv("URL_COL_NUM")
-if URL_COL_NUM:
-    URL_COL_NUM = int(URL_COL_NUM)  # pragma: no cover
-PRICE_COL_LTR = os.getenv("PRICE_COL_LTR")
+try:
+    LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO").upper()
+    TABLE_ID = os.environ["TABLE_ID"]
+    SHEET_TITLE = os.environ["SHEET_TITLE"]
+    TITLE_ROWS_COUNT = int(os.environ["TITLE_ROWS_COUNT"])
+    URL_COL_NUM = int(os.environ["URL_COL_NUM"])
+    PRICE_COL_LTR = os.environ["PRICE_COL_LTR"]
+except KeyError as err:
+    err.add_note(f"\nEnvironment variable {err} must be set")
+    raise err
 
-SCOPE = ["https://spreadsheets.google.com/feeds"]
+SCOPE = "https://spreadsheets.google.com/feeds"
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(
@@ -38,14 +38,14 @@ logging.getLogger("asyncio").setLevel(logging.WARNING)
 @dataclass
 class Product:
     name: str
-    price: int
+    price: int | None
     cell: str
 
 
 class Browser:
     """Playwright Browser."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.playwright = sync_playwright().start()
         self.browser = self.playwright.firefox.launch(headless=True)
         self.page = self.browser.new_page()
@@ -65,7 +65,7 @@ class Browser:
         return int(price.group(1))
 
 
-def gspread_client(key_file: str = None, scope: list = SCOPE) -> gspread.Client:
+def gspread_client(key_file: str | None = None, scope: str = SCOPE) -> gspread.Client:
     """Login to Google Spreadsheet."""
     if key_file is None:
         key_file = str(Path(__file__).parent.absolute() / "cred.json")
@@ -80,7 +80,9 @@ def open_worksheet(
     return gc.open_by_key(table_id).worksheet(sheet_title)
 
 
-def get_non_empty_cells(wks: gspread.Worksheet, col_num: int = URL_COL_NUM) -> list:
+def get_non_empty_cells(
+    wks: gspread.Worksheet, col_num: int = URL_COL_NUM
+) -> list[str]:
     """Get non-empty cells from Google Spreadsheet."""
     col_values = wks.col_values(col_num, value_render_option="FORMULA")
     return [item for item in col_values if item]

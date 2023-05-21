@@ -2,6 +2,12 @@ stages:
   - test
   - run
 
+variables:
+  SHEET_TITLE: "Диски"
+  TITLE_ROWS_COUNT: "1"
+  URL_COL_NUM: "2"
+  PRICE_COL_LTR: "F"
+
 pre-commit:
   stage: .pre
   extends: .base
@@ -52,11 +58,6 @@ run:
     key: run
     paths:
       - venv/
-  variables:
-    SHEET_TITLE: "Диски"
-    TITLE_ROWS_COUNT: "1"
-    URL_COL_NUM: "2"
-    PRICE_COL_LTR: "F"
   script:
     - pip install --no-cache-dir --upgrade -r requirements.txt
     - playwright install firefox
