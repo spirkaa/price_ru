@@ -13,7 +13,7 @@ build:
 		--tag ${TAG} .
 
 test:
-	@pytest -v
+	@pytest -v --cov-report html
 
 cleanup:
 	@docker rmi -f ${TAG}

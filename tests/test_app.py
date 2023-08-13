@@ -48,7 +48,7 @@ class TestClient:
         return TestSpreadsheet()
 
 
-@pytest.fixture
+@pytest.fixture()
 def mocker_browser(mocker):
     """Fixture for browser."""
     mocker.patch("playwright.sync_api.PlaywrightContextManager.start")
@@ -89,8 +89,8 @@ def test_gspread_client(mocker):
         "oauth2client.service_account.ServiceAccountCredentials.from_json_keyfile_name"
     )
     mocker.patch("gspread.authorize")
-    app.gspread_client()
-    app.gspread_client("key")
+    app.gspread_client("scope")
+    app.gspread_client("scope", "key")
     app.gspread.authorize.assert_called()
     mocker.resetall()
 
@@ -142,9 +142,9 @@ def test_main(mocker):
     mocker.patch("price_ru.app.gspread_client")
     mocker.patch("price_ru.app.open_worksheet")
     mocker.patch("price_ru.app.get_non_empty_cells", return_value=URL_CELLS[1:])
-    mocker.patch("price_ru.app.Browser.__init__", lambda x: None)
+    mocker.patch("price_ru.app.Browser.__init__", return_value=None)
     mocker.patch("price_ru.app.Browser.get_price_from_title")
     mocker.patch("price_ru.app.update_product_price")
-    app.main("F", 1)
+    app.main()
     assert app.update_product_price.call_args[0][1].name == "ST20000NM007D   "
     mocker.resetall()

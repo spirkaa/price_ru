@@ -11,28 +11,39 @@ from playwright.sync_api import sync_playwright
 
 load_dotenv()
 
-try:
-    LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO").upper()
-    TABLE_ID = os.environ["TABLE_ID"]
-    SHEET_TITLE = os.environ["SHEET_TITLE"]
-    TITLE_ROWS_COUNT = int(os.environ["TITLE_ROWS_COUNT"])
-    URL_COL_NUM = int(os.environ["URL_COL_NUM"])
-    PRICE_COL_LTR = os.environ["PRICE_COL_LTR"]
-except KeyError as err:
-    err.add_note(f"\nEnvironment variable {err} must be set")
-    raise err
-
-SCOPE = "https://spreadsheets.google.com/feeds"
-
 logger = logging.getLogger(__name__)
-logging.basicConfig(
-    format="%(asctime)s [%(levelname)s] [%(name)s:%(lineno)s:%(funcName)s] %(message)s",  # noqa
-    level=LOG_LEVEL,
-)
-logging.getLogger("google.auth.transport.requests").setLevel(logging.WARNING)
-logging.getLogger("oauth2client").setLevel(logging.WARNING)
-logging.getLogger("urllib3").setLevel(logging.WARNING)
-logging.getLogger("asyncio").setLevel(logging.WARNING)
+
+
+@dataclass
+class Config:
+    log_level: str
+    table_id: str
+    sheet_title: str
+    title_rows_count: int
+    url_col_num: int
+    price_col_ltr: str
+    scope: str = "https://spreadsheets.google.com/feeds"
+
+    def __init__(self):
+        try:
+            self.log_level = os.getenv("LOG_LEVEL", "INFO").upper()
+            self.table_id = os.environ["TABLE_ID"]
+            self.sheet_title = os.environ["SHEET_TITLE"]
+            self.title_rows_count = int(os.environ["TITLE_ROWS_COUNT"])
+            self.url_col_num = int(os.environ["URL_COL_NUM"])
+            self.price_col_ltr = os.environ["PRICE_COL_LTR"]
+        except KeyError as err:
+            err.add_note(f"\nEnvironment variable {err} must be set")
+            raise err
+
+        logging.basicConfig(
+            format="%(asctime)s [%(levelname)s] [%(name)s:%(lineno)s:%(funcName)s] %(message)s",
+            level=self.log_level,
+        )
+        logging.getLogger("google.auth.transport.requests").setLevel(logging.WARNING)
+        logging.getLogger("oauth2client").setLevel(logging.WARNING)
+        logging.getLogger("urllib3").setLevel(logging.WARNING)
+        logging.getLogger("asyncio").setLevel(logging.WARNING)
 
 
 @dataclass
@@ -61,11 +72,11 @@ class Browser:
         title = self.get_title(url)
         price = price_regex.search(title)
         if not price:
-            return
+            return None
         return int(price.group(1))
 
 
-def gspread_client(key_file: str | None = None, scope: str = SCOPE) -> gspread.Client:
+def gspread_client(scope: str, key_file: str | None = None) -> gspread.Client:
     """Login to Google Spreadsheet."""
     if key_file is None:
         key_file = str(Path(__file__).parent.absolute() / "cred.json")
@@ -74,15 +85,13 @@ def gspread_client(key_file: str | None = None, scope: str = SCOPE) -> gspread.C
 
 
 def open_worksheet(
-    gc: gspread.Client, table_id: str = TABLE_ID, sheet_title: str = SHEET_TITLE
+    gc: gspread.Client, table_id: str, sheet_title: str
 ) -> gspread.Worksheet:
     """Open Google Spreadsheet."""
     return gc.open_by_key(table_id).worksheet(sheet_title)
 
 
-def get_non_empty_cells(
-    wks: gspread.Worksheet, col_num: int = URL_COL_NUM
-) -> list[str]:
+def get_non_empty_cells(wks: gspread.Worksheet, col_num: int) -> list[str]:
     """Get non-empty cells from Google Spreadsheet."""
     col_values = wks.col_values(col_num, value_render_option="FORMULA")
     return [item for item in col_values if item]
@@ -105,15 +114,12 @@ def update_product_price(wks: gspread.Worksheet, product: Product) -> None:
         wks.update_acell(product.cell, product.price)
 
 
-def main(
-    price_col_letter: str = PRICE_COL_LTR, title_rows_count: int = TITLE_ROWS_COUNT
-) -> None:
-    """Main function."""
-    gc = gspread_client()
-    wks = open_worksheet(gc)
-    url_cells = get_non_empty_cells(wks)
+def run(config: Config) -> None:
+    gc = gspread_client(config.scope)
+    wks = open_worksheet(gc, config.table_id, config.sheet_title)
+    url_cells = get_non_empty_cells(wks, config.url_col_num)
     browser = Browser()
-    for idx, cell in enumerate(url_cells, 1 + title_rows_count):
+    for idx, cell in enumerate(url_cells, 1 + config.title_rows_count):
         if "HYPERLINK" not in cell:
             continue
         cell_splitted = cell.split('"')
@@ -122,10 +128,16 @@ def main(
         product = Product(
             name=name,
             price=browser.get_price_from_title(url),
-            cell=f"{price_col_letter}{idx}",
+            cell=f"{config.price_col_ltr}{idx}",
         )
         update_product_price(wks, product)
 
 
-if __name__ == "__main__":  # pragma: no cover
+def main() -> None:
+    """Main function."""
+    config = Config()
+    run(config)
+
+
+if __name__ == "__main__":
     main()
