@@ -15,7 +15,7 @@ pipeline {
     // TITLE_ROWS_COUNT = '1'
     // URL_COL_NUM = '2'
     // PRICE_COL_LTR = 'F'
-    BUILD_IMAGE = 'ghcr.io/spirkaa/python:3.11-bullseye-playwright-firefox'
+    BUILD_IMAGE = 'ghcr.io/spirkaa/python:3.11-bookworm-playwright-firefox'
   }
 
   stages {
