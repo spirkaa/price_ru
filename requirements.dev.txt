@@ -4,9 +4,9 @@
 pre-commit
 
 # Testing
-coverage==7.3.0
-pytest==7.4.0
-pytest-cov==4.1.0
-pytest-mock==3.11.1
-pytest-sugar==0.9.7
-pytest-randomly==3.13.0
+coverage==7.6.12
+pytest==8.3.4
+pytest-cov==6.0.0
+pytest-mock==3.14.0
+pytest-sugar==1.0.0
+pytest-randomly==3.16.0

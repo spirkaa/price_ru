@@ -70,7 +70,7 @@ run:
   retry: 1
 
 .base:
-  image: ghcr.io/spirkaa/python:3.11-bookworm-playwright-firefox
+  image: ghcr.io/spirkaa/python:3.13-bookworm-playwright-firefox
   before_script:
     - python --version
     - python -m venv venv

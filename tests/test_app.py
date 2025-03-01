@@ -10,7 +10,7 @@ URL_CELLS = [
     '=HYPERLINK("https://price.ru/zhestkie-diski/seagate-st20000nm007d/";"ST20000NM007D")',
 ]
 PRICE = 1234
-TITLE = f"купить по цене от {PRICE} руб в интернет-магазинах"
+TITLE = f"купить по цене от {PRICE} руб в интернет-магазинах"  # noqa: RUF001
 CELL_VALUE = 15
 NEW_PRICE = 42
 
@@ -31,7 +31,7 @@ class TestWorksheet:
         return TestCell()
 
     def update_acell(self, *args, **kwargs):
-        pass
+        """Update cell mock."""
 
 
 class TestSpreadsheet:
@@ -48,7 +48,7 @@ class TestClient:
         return TestSpreadsheet()
 
 
-@pytest.fixture()
+@pytest.fixture
 def mocker_browser(mocker):
     """Fixture for browser."""
     mocker.patch("playwright.sync_api.PlaywrightContextManager.start")
@@ -57,14 +57,16 @@ def mocker_browser(mocker):
     mocker.resetall()
 
 
-def test_get_title(mocker, mocker_browser):
+@pytest.mark.usefixtures("mocker_browser")
+def test_get_title(mocker):
     """Test - Get title."""
     browser = app.Browser()
     title = browser.get_title("http://test")
     assert isinstance(title, mocker.MagicMock)
 
 
-def test_get_price_from_title(mocker, mocker_browser):
+@pytest.mark.usefixtures("mocker_browser")
+def test_get_price_from_title(mocker):
     """Test - Get price from page title."""
     mocker.patch("price_ru.app.Browser.get_title", return_value=TITLE)
     browser = app.Browser()
@@ -73,7 +75,8 @@ def test_get_price_from_title(mocker, mocker_browser):
     mocker.resetall()
 
 
-def test_get_price_from_title_empty(mocker, mocker_browser):
+@pytest.mark.usefixtures("mocker_browser")
+def test_get_price_from_title_empty(mocker):
     """Test - Get price from page title - empty."""
     mocker.patch("price_ru.app.Browser.get_title", return_value="")
     browser = app.Browser()
@@ -99,7 +102,6 @@ def test_open_worksheet():
     """Test - Open Google Spreadsheet."""
     gc = TestClient()
     res = app.open_worksheet(gc, "id123", "title")
-    print(type(res))
     assert isinstance(res, TestWorksheet)
 
 

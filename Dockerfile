@@ -1,6 +1,6 @@
 # hadolint global ignore=DL3006
 
-ARG BUILD_IMAGE=ghcr.io/spirkaa/python:3.11-bookworm-playwright-firefox
+ARG BUILD_IMAGE=ghcr.io/spirkaa/python:3.13-bookworm-playwright-firefox
 
 FROM ${BUILD_IMAGE}
 

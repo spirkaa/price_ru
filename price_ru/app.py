@@ -1,3 +1,5 @@
+"""Get product price from price.ru."""
+
 import logging
 import os
 import re
@@ -16,6 +18,8 @@ logger = logging.getLogger(__name__)
 
 @dataclass
 class Config:
+    """Config class."""
+
     log_level: str
     table_id: str
     sheet_title: str
@@ -24,7 +28,8 @@ class Config:
     price_col_ltr: str
     scope: str = "https://spreadsheets.google.com/feeds"
 
-    def __init__(self):
+    def __init__(self) -> None:
+        """Init Config class."""
         try:
             self.log_level = os.getenv("LOG_LEVEL", "INFO").upper()
             self.table_id = os.environ["TABLE_ID"]
@@ -34,7 +39,7 @@ class Config:
             self.price_col_ltr = os.environ["PRICE_COL_LTR"]
         except KeyError as err:
             err.add_note(f"\nEnvironment variable {err} must be set")
-            raise err
+            raise
 
         logging.basicConfig(
             format="%(asctime)s [%(levelname)s] [%(name)s:%(lineno)s:%(funcName)s] %(message)s",
@@ -48,6 +53,8 @@ class Config:
 
 @dataclass
 class Product:
+    """Product."""
+
     name: str
     price: int | None
     cell: str
@@ -57,6 +64,7 @@ class Browser:
     """Playwright Browser."""
 
     def __init__(self) -> None:
+        """Init Browser class."""
         self.playwright = sync_playwright().start()
         self.browser = self.playwright.firefox.launch(headless=True)
         self.page = self.browser.new_page()
@@ -68,7 +76,7 @@ class Browser:
 
     def get_price_from_title(self, url: str) -> int | None:
         """Get price from page title."""
-        price_regex = re.compile(r"от\s+(\d+)\s+руб")
+        price_regex = re.compile(r"от\s+(\d+)\s+руб")  # noqa: RUF001
         title = self.get_title(url)
         price = price_regex.search(title)
         if not price:
@@ -91,9 +99,11 @@ def open_worksheet(
     return gc.open_by_key(table_id).worksheet(sheet_title)
 
 
-def get_non_empty_cells(wks: gspread.Worksheet, col_num: int) -> list[str]:
+def get_non_empty_cells(wks: gspread.Worksheet, col_num: int) -> list:
     """Get non-empty cells from Google Spreadsheet."""
-    col_values = wks.col_values(col_num, value_render_option="FORMULA")
+    col_values = wks.col_values(
+        col_num, value_render_option=gspread.utils.ValueRenderOption.formula
+    )
     return [item for item in col_values if item]
 
 
@@ -101,20 +111,21 @@ def update_product_price(wks: gspread.Worksheet, product: Product) -> None:
     """Update product price in cell."""
     if not product.price:
         return
-    old_price = int(wks.acell(product.cell).value)
+    old_price = int(wks.acell(product.cell).value or 0)
     price_change = product.price - old_price
     logger.info(
-        f"{product.name} --- Old price: {old_price}, "
+        f"{product.name} --- Old price: {old_price}, "  # noqa: G004
         f"New price: {product.price}, Change: {price_change}"
     )
     if price_change != 0:
         logger.info(
-            f"{product.name} --- Updating cell {product.cell} with {product.price}"
+            f"{product.name} --- Updating cell {product.cell} with {product.price}"  # noqa: G004
         )
         wks.update_acell(product.cell, product.price)
 
 
 def run(config: Config) -> None:
+    """Run parser."""
     gc = gspread_client(config.scope)
     wks = open_worksheet(gc, config.table_id, config.sheet_title)
     url_cells = get_non_empty_cells(wks, config.url_col_num)
@@ -134,7 +145,7 @@ def run(config: Config) -> None:
 
 
 def main() -> None:
-    """Main function."""
+    """Execute main function."""
     config = Config()
     run(config)
 

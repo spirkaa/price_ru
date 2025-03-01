@@ -1,39 +1,39 @@
+[project]
+name = "price_ru"
+version = "0.1.0"
+description = "Get product price from price.ru"
+readme = "README.md"
+requires-python = ">=3.13"
+
 [tool.pytest.ini_options]
-addopts = "--cov=. --cov-report term-missing:skip-covered"
+addopts = "-ra --cov=. --cov-report term-missing:skip-covered"
 
 [tool.coverage.run]
 branch = true
 
 [tool.coverage.report]
-exclude_also = [
-  "if __name__ == .__main__.:",
-]
+exclude_also = ["if __name__ == .__main__.:", "if TYPE_CHECKING:"]
+precision = 2
 
-[tool.ruff]
+[tool.ruff.lint]
+select = ["ALL"]
 ignore = [
-  "E203", # whitespace before ':'
-  "E501", # line length violations
+  "E501",   # line length violations
+  "D203",   # one-blank-line-before-class
+  "D213",   # multi-line-summary-second-line
+  "COM812", # missing-trailing-comma
+  "ISC001", # single-line-implicit-string-concatenation
 ]
-select = [
-  "E", # pycodestyle errors
-  "W", # pycodestyle warnings
-  "F", # pyflakes
-  "B", # flake8-bugbear
-  "C4", # flake8-comprehensions
-  "I", # isort
-  "UP", # pyupgrade
-  "FBT", # flake8-boolean-trap
-  "PIE", # flake8-pie
-  "SIM", # flake8-simplify
-  "PT", # flake8-pytest-style
-  "RET", # flake8-return
-  "PTH", # flake8-use-pathlib
-  "S", # flake8-bandit
+
+[tool.ruff.lint.per-file-ignores]
+"*test*" = [
+  "D",       # pydocstyle
+  "ANN",     # tests don't have to use annotations
+  "S101",    # allow assert statements in test cases
+  "PLR0913", # tests can use many arguments for fixtures
+  "SLF001",  # tests can access private members
+  "ARG002",  # tests can have unused arguments
 ]
-target-version = "py311"
 
-[tool.ruff.per-file-ignores]
-"*test*" = ["S101"] # allow assert statements in test cases
-
-[tool.ruff.isort]
+[tool.ruff.lint.isort]
 combine-as-imports = true
